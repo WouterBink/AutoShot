@@ -1,5 +1,5 @@
 ## Interface: 112100
 ## Title : AutoShot
-## Notes: This AddOn takes a screenshot on levelup.
+## Notes: This AddOn takes a screenshot on levelup and quest complete.
 ## Author: Apocalypsa
 AutoShot.lua
