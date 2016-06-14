@@ -1,0 +1,15 @@
+<Ui>
+	<Frame name="AutoShot">	
+		<Scripts>
+			<OnLoad>
+				AutoShot_OnLoad();
+			</OnLoad>
+			<OnEvent>
+				AutoShot_OnEvent(event);
+			</OnEvent>
+			<OnUpdate>
+				AutoShot_OnUpdate();
+			</OnUpdate>
+		</Scripts>
+    </Frame>
+</Ui>

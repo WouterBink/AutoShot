@@ -1,43 +1,51 @@
-AutoShot = CreateFrame("FRAME", "AutoShot");
-
 local timer = GetTime();
-local SSTimer = 1800;
 
-local SSOnHK = true;
-local SSOnLvl = true;
-local SSOnBG = true;
-local SSOnTimer = true;
+local colorScheme = {blue = "FF3CAFFF"}
 
-local version = "1.0.0";
-local colorScheme = "FF3CAFFF";
+local version;
 
-AutoShot:RegisterEvent("PLAYER_LEVEL_UP");
-AutoShot:RegisterEvent("PLAYER_PVP_KILLS_CHANGED");
-AutoShot:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
+if (not ASConfig) then ASConfig = {}; end
 
 function print(s)
     DEFAULT_CHAT_FRAME:AddMessage(s);
 end
 
 local function printHelp()
-    print("|c" .. colorScheme .. "AutoShot: |rAutomatically take screenshots.");
-    print("|c" .. colorScheme .. "   Commands:");
-    print(" - |c" .. colorScheme .. "trigger hk: |rTake screenshot after getting an honorable kill outside a battleground. Current value: [" .. tostring(SSOnHK) .. "]");
-    print(" - |c" .. colorScheme .. "trigger bg: |rTake screenshot after completing a battleground. Current value: [" .. tostring(SSOnBG) .. "]");
-    print(" - |c" .. colorScheme .. "trigger lvl: |rTake screenshot after levelling up. Current value: [" .. tostring(SSOnLvl) .. "]");
-    print(" - |c" .. colorScheme .. "trigger timer: |rTake screenshot after a certain time has passed. Current value: [" .. tostring(SSOnTimer) .. "]");
-    print(" - |c" .. colorScheme .. "timer <seconds>: |rTime between automatic screenshots (not counting other triggers). Current value: [" .. SSTimer .. "]");
+    print("|c" .. colorScheme.blue .. "AutoShot: |rAutomatically take screenshots.");
+    print("|c" .. colorScheme.blue .. "   Commands:");
+    print(" - |c" .. colorScheme.blue .. "trigger hk: |rTake screenshot after getting an honorable kill outside a battleground. Current value: [" .. tostring(ASConfig.SSOnHK) .. "]");
+    print(" - |c" .. colorScheme.blue .. "trigger bg: |rTake screenshot after completing a battleground. Current value: [" .. tostring(ASConfig.SSOnBG) .. "]");
+    print(" - |c" .. colorScheme.blue .. "trigger lvl: |rTake screenshot after levelling up. Current value: [" .. tostring(ASConfig.SSOnLvl) .. "]");
+    print(" - |c" .. colorScheme.blue .. "trigger timer: |rTake screenshot after a certain time has passed. Current value: [" .. tostring(ASConfig.SSOnTimer) .. "]");
+    print(" - |c" .. colorScheme.blue .. "timer <seconds>: |rTime between automatic screenshots (not counting other triggers). Current value: [" .. ASConfig.SSTimer .. "]");
 end
 
-local function eventHandler(self, event, ...)
-    -- <Should> Take screenshot after bg finish.
-    if SSOnBG and event == "UPDATE_BATTLEFIELD_STATUS" then
+function AutoShot_OnLoad()
+    version = GetAddOnMetadata("AutoShot", "Version");
+    
+    AutoShot:RegisterEvent("PLAYER_LEVEL_UP");
+    AutoShot:RegisterEvent("PLAYER_PVP_KILLS_CHANGED");
+    AutoShot:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
+    AutoShot:RegisterEvent("ADDON_LOADED");
+    
+    if not ASConfig.SSOnBG then ASConfig.SSOnBG = true; end
+    if not ASConfig.SSOnHK then ASConfig.SSOnHK = true; end
+    if not ASConfig.SSOnLvl then ASConfig.SSOnLvl = true; end
+    if not ASConfig.SSOnTimer then ASConfig.SSOnTimer = true; end
+    if not ASConfig.SSTimer then ASConfig.SSTimer = 1800; end
+    
+    print("|c" .. colorScheme.blue .. "AutoShot |rv" .. version .. " loaded.");
+end
+
+function AutoShot_OnEvent(event, ...)
+    -- <Should> Take screenshot after bg finish. Untested.
+    if (event == "UPDATE_BATTLEFIELD_STATUS" and ASConfig.SSOnBG) then
         if GetBattlefieldInstanceExpiration() > 0 then 
             Screenshot(); 
         end         
     
     -- Take screenshot after HK while not in bg.
-    elseif SSOnHK and event == "PLAYER_PVP_KILLS_CHANGED" then
+    elseif (event == "PLAYER_PVP_KILLS_CHANGED" and ASConfig.SSOnHK) then
         local b, t = IsInInstance();
         
         if not b or t ~= "pvp" then
@@ -45,15 +53,18 @@ local function eventHandler(self, event, ...)
         end
         
     -- Take screenshot on levelup.    
-    elseif SSOnLvl and event == "PLAYER_LEVEL_UP" then
+    elseif (event == "PLAYER_LEVEL_UP" and ASConfig.SSOnLvl) then
         Screenshot();
     end
 end
 
-local function updateHandler()
-    if SSOnTimer and GetTime() - timer > SSTimer then
-        Screenshot();
-        timer = GetTime();
+function AutoShot_OnUpdate()
+    -- Take screenshot if timer exceeds the set SSTimer length.
+    if (ASConfig.SSOnTimer) then
+        if (GetTime() - timer > ASConfig.SSTimer) then
+            Screenshot();
+            timer = GetTime();
+        end
     end
 end
 
@@ -65,24 +76,24 @@ local function slashCommandHandler(msg, editbox)
     
     if cmd == "trigger" then
         if args == "hk" then 
-            SSOnHK = not SSOnHK;
-            print("AutoShot Honorable Kill Trigger set to: [" .. tostring(SSOnHK) .. "]");
+            ASConfig.SSOnHK = not ASConfig.SSOnHK;
+            print("AutoShot Honorable Kill Trigger set to: [" .. tostring(ASConfig.SSOnHK) .. "]");
         elseif args == "bg" then 
-            SSOnBG = not SSOnBG;
-            print("AutoShot Battleground Trigger set to: [" .. tostring(SSOnBG) .. "]");
+            ASConfig.SSOnBG = not ASConfig.SSOnBG;
+            print("AutoShot Battleground Trigger set to: [" .. tostring(ASConfig.SSOnBG) .. "]");
    
         elseif args == "timer" then 
-            SSOnTimer = not SSOnTimer;
-            print("AutoShot Timer Trigger set to: [" .. tostring(SSOnTimer) .. "]");
+            ASConfig.SSOnTimer = not ASConfig.SSOnTimer;
+            print("AutoShot Timer Trigger set to: [" .. tostring(ASConfig.SSOnTimer) .. "]");
         elseif args == "lvl" then 
-            SSOnLvl = not SSOnLvl; 
-            print("AutoShot Levelup Trigger set to: [" .. tostring(SSOnLvl) .. "]");        
+            ASConfig.SSOnLvl = not ASConfig.SSOnLvl; 
+            print("AutoShot Levelup Trigger set to: [" .. tostring(ASConfig.SSOnLvl) .. "]");        
         end
     
     elseif cmd == "timer" then
         if tonumber(args) ~= nil then
-            SSTimer = tonumber(args);
-            print("Seconds between automatic screenshots set to: [" .. SSTimer .. "]");
+            ASConfig.SSTimer = tonumber(args);
+            print("Seconds between automatic screenshots set to: [" .. ASConfig.SSTimer .. "]");
         end
     
     elseif cmd == "version" then
@@ -95,6 +106,3 @@ end
 
 SlashCmdList["AUTOSHOT"] = slashCommandHandler;
 
-
-AutoShot:SetScript("OnEvent", eventHandler);
-AutoShot:SetScript("OnUpdate", updateHandler);
