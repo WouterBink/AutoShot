@@ -6,9 +6,6 @@ Features:
 
 Screenshots on Levelup, Honorable Kill, Battleground Win/Loss, and on a timer.
 
-Known Issues:
-Screenshot after BG untested.
-
 Changelog:
 
 1.1: Settings are now saved between sessions.
@@ -16,6 +13,9 @@ Changelog:
 
 Planned features:
 
-More triggers (suggestions?)
-Cleaner slash commands setup (Maybe move to AceConsole)
-GUI?
+Gui
+More triggers:
+  Highest crit/crit above a set number
+  Boss/rare kill
+  Item loot (rarity customizable)
+  Trade (excluding healthstones, water etc)
