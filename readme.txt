@@ -11,6 +11,7 @@ Screenshot after BG untested.
 
 Changelog:
 
+1.1: Settings are now saved between sessions.
 1.0: Initial release
 
 Planned features:
